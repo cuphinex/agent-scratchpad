@@ -161,8 +161,11 @@ sealed class Config
                 case "command": if (val.Length > 0) c.Command = val; break;
                 case "agent": // nome | comando
                     int bar = val.IndexOf('|');
-                    string name = bar < 0 ? val : val.Substring(0, bar).Trim(), cmd = bar < 0 ? val : val.Substring(bar + 1).Trim();
-                    if (cmd.Length > 0) c.Agents.Add(new Agent { Name = name.Length > 0 ? name : cmd, Command = cmd });
+                    string name = bar < 0 ? val : val.Substring(0, bar).Trim();
+                    // %USERPROFILE% etc.: permite apontar para um executável exato quando o PATH tem
+                    // outro com o mesmo nome (ex.: o Grok traz um claude.exe antigo em .grok\bin).
+                    string cmd = Environment.ExpandEnvironmentVariables(bar < 0 ? val : val.Substring(bar + 1).Trim());
+                    if (cmd.Length > 0) c.Agents.Add(new Agent { Name = name.Length > 0 ? name : cmd, Command = cmd.Contains(" ") && File.Exists(cmd) ? "\"" + cmd + "\"" : cmd });
                     break;
                 case "width_split": c.WidthSplit = Num(val, c.WidthSplit, 0.1, 1); break;
                 case "workdir": if (val.Length > 0) c.WorkDir = Environment.ExpandEnvironmentVariables(val); break;
