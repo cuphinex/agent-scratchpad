@@ -1,0 +1,4 @@
+# Saída da compilação (build.ps1)
+bin/
+*.exe
+*.log
